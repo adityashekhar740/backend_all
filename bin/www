@@ -5,7 +5,11 @@
  */
 
 var app = require('../app');
+<<<<<<< HEAD
 var debug = require('debug')('express:server');
+=======
+var debug = require('debug')('example:server');
+>>>>>>> 63f6ac5c28b5bfb53e15af58abbfec56cc2c7d9a
 var http = require('http');
 
 /**

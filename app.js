@@ -7,12 +7,11 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
+app.use(session({
+  resave:false,               // whenever a duplicate data will come as a session to server it won't save it which reduces stress on server
+  saveUninitialized:false,     // don't save things on the sever as session which are not initialized only imp info
+  secret:"yoyoyoyo"             // for encrypting the session data
+}))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
