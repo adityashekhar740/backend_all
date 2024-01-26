@@ -1,6 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const userModel = require("./users");
+const passport=require('passport');
+const localStratergy=require('passport-local');
+passport.use(new localStratergy(userModel.authenticate()));
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -61,4 +64,65 @@ router.get("/findexist", async function (req, res) {
   });
   res.send(user);
 });
+router.get('/findlen',async function(req,res){
+  const ans= await userModel.find({
+    $expr:{
+    $and:[
+      {$gte: [{$strLenCP:'$nickname'},4]},
+      {$lte: [{$strLenCP:'$nickname'},25]}
+    ]
+  }
+  })
+  res.send(ans);
+})
+
+function isLoggedIn(req,res,next){
+  if(req.isAuthenticated()){
+    return next();
+  }
+  res.redirect('/');
+}
+
+router.get('/profile',function(req,res){
+  res.render('profile');
+
+})
+
+// register route
+
+router.post('/register', async function(req, res) {
+  try {
+    var userdata = new userModel({
+      username: req.body.username,
+      secret: req.body.secret
+    });
+    await userModel.register(userdata, req.body.password);
+    passport.authenticate('local')(req, res, function() {
+
+      res.redirect('/profile');
+    });
+  } catch (error) {
+    if (error.name === 'UserExistsError') {
+      res.send('user already exists');
+    }
+  }
+});
+
+
+router.post('/login',passport.authenticate('local',{
+  
+  successRedirect: '/profile',
+  failureRedirect: '/'
+}))
+
+router.get('/logout',function(req,res,next){
+  req.logout(function(err){
+    if(err) return next(err);
+    res.redirect('/');
+  })
+
+})
+
+
+
 module.exports = router;
